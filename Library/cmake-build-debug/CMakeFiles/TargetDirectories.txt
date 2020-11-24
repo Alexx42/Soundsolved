@@ -1,0 +1,4 @@
+C:/Users/alexandrelegoff/Desktop/Soundsolved/Library/cmake-build-debug/CMakeFiles/Soundsolved.dir
+C:/Users/alexandrelegoff/Desktop/Soundsolved/Library/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/alexandrelegoff/Desktop/Soundsolved/Library/cmake-build-debug/CMakeFiles/test.dir
+C:/Users/alexandrelegoff/Desktop/Soundsolved/Library/cmake-build-debug/CMakeFiles/edit_cache.dir

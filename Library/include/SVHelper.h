@@ -6,6 +6,7 @@
 #define SOUNDSOLVED_SVHELPER_H
 
 #include <string>
+#include <memory>
 #include <Soundsolved.h>
 #include <windows.h>
 
@@ -82,6 +83,18 @@ namespace soundsolved::SVHelper {
 		hr = pCollection->GetCount(&nDevices);
 		if (FAILED(hr)) { throw std::runtime_error("Cannot get the number of audio devices"); }
 		return nDevices;
+	}
+
+	std::unique_ptr<SVAudioDevices::SVAudioDevices> makeAudioDevice(
+			IMMDevice *pDevice, IPropertyStore *pProps, const std::wstring& name = L"") {
+		LPWSTR id;
+		PROPVARIANT varName;
+
+		hr = pDevice->GetId(&id);
+
+		safeRelease(pDevice, pProps);
+		if (FAILED(hr)) { throw std::runtime_error("Cannot get device informations"); }
+		return nullptr;
 	}
 }
 

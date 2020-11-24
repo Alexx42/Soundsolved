@@ -8,6 +8,7 @@
 #include <string>
 
 #include <memory>
+#include <utility>
 
 #include <windows.h>
 #include <commctrl.h>
@@ -18,7 +19,6 @@
 
 #include <initguid.h>
 #include <functiondiscoverykeys_devpkey.h>
-
 
 namespace soundsolved {
 	extern IMMDeviceCollection* pCollection;
@@ -90,20 +90,13 @@ namespace soundsolved::SVAudioDevices {
 		}
 	};
 
-	struct SVAudioDevices : SVDevicesEvent {
-		std::string nom;
-		std::string id;
-	};
-
-	struct SVSpeaker :  SVAudioDevices {
-
-	};
-
-	struct SVHeadphone :  SVAudioDevices {
-
-	};
-
-	struct SVMicrophone : SVAudioDevices {
+	class SVAudioDevices : SVDevicesEvent {
+	public:
+		SVAudioDevices(std::wstring nom, std::wstring id) :
+			nom_(std::move(nom)), id_(std::move(id)) {;}
+	protected:
+		std::wstring nom_;
+		std::wstring id_;
 	};
 
 	/*

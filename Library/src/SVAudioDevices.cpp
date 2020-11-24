@@ -34,8 +34,9 @@ std::unique_ptr<SVAudioDevices::SVAudioDevices> SVAudioDevices::getAudioDevice(
 			hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
 			if (hr != S_OK) { break; }
 			if (std::wstring(varName.pwszVal) == name) {
-				return std::make_unique<SVAudioDevices>();
+				return SVHelper::makeAudioDevice(pDevice, pProps);
 			}
+			SVHelper::safeRelease(pDevice, pProps);
 		}
 	}
 	if (FAILED(hr)) {

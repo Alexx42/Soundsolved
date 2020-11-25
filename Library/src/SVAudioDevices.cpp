@@ -15,12 +15,14 @@ std::unique_ptr<SVAudioDevices::SVAudioDevices> SVAudioDevices::getAudioDevice(
 	IMMDevice *pDevice;
 	PROPVARIANT varName;
 	IPropertyStore *pProps;
+	std::unique_ptr<SVAudioDevices> device;
 
+	device = nullptr;
 	pProps = nullptr;
 	pDevice = nullptr;
 	PropVariantInit(&varName);
 	try {
-		SVHelper::getNumberDevices();
+		nDevices = SVHelper::getNumberDevices();
 	} catch (std::runtime_error& e) {
 		throw e;
 	}
@@ -33,16 +35,22 @@ std::unique_ptr<SVAudioDevices::SVAudioDevices> SVAudioDevices::getAudioDevice(
 			PropVariantClear(&varName);
 			hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
 			if (hr != S_OK) { break; }
-			if (std::wstring(varName.pwszVal) == name) {
-				return SVHelper::makeAudioDevice(pDevice, pProps);
+			if (name == varName.pwszVal) {
+				try {
+					device = SVHelper::makeAudioDevice(pDevice, pProps);
+					break ;
+				} catch (std::runtime_error& e) {
+					SVHelper::safeRelease(pEnumerator, pCollection);
+					throw e;
+				}
 			}
 			SVHelper::safeRelease(pDevice, pProps);
 		}
 	}
+	SVHelper::safeRelease(pEnumerator, pDevice, pProps);
 	if (FAILED(hr)) {
-		SVHelper::safeRelease(pEnumerator, pDevice);
 		throw std::runtime_error("Cannot get information about a specific device.");
 	}
-	return nullptr;
+	return device;
 }
 

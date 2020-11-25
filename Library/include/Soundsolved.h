@@ -21,9 +21,6 @@ namespace soundsolved {
 	/*
 	 * Functions to get specific Audio Devices
 	 */
-	inline std::unique_ptr<SVAudioDevices::SVAudioDevices> getAudioDevice(const std::wstring& s) {
-		return soundsolved::SVAudioDevices::getAudioDevice(s);
-	}
 }
 
 #endif //SOUNDSOLVED_SOUNDSOLVED_H

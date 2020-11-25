@@ -8,6 +8,9 @@
 #include <string>
 #include <memory>
 #include <Soundsolved.h>
+#include <SVMicrophone.h>
+#include <SVSpeaker.h>
+#include <SVHelper.h>
 #include <windows.h>
 
 /*
@@ -15,6 +18,8 @@
  * contains functions helping for the library development.
  */
 namespace soundsolved::SVHelper {
+
+#define ERR_INF_DEVICE "Runtime error: Cannot get information about the device."
 
 	template <typename T>
 	inline void safeRelease(T t) {
@@ -25,12 +30,35 @@ namespace soundsolved::SVHelper {
 
 	template <typename T1, typename T2>
 	inline void safeRelease(T1 t1, T2 t2) {
-		safeRelease(t1), safeRelease(t2);
+		if (t1 != nullptr) {
+			t1->Release();
+		}
+		if (t2 != nullptr) {
+			t2->Release();
+		}
 	}
 
 	template <typename T1, typename T2, typename T3>
-	inline void safeRelase(T1 t1, T2 t2, T3 t3) {
+	inline void safeRelease(T1 t1, T2 t2, T3 t3) {
 		safeRelease(t1, t2), safeRelease(t3);
+	}
+
+	template <typename T1, typename T2>
+	inline void ifError(HRESULT hr, const std::string& msg,
+						T1 t1, T2 t2) {
+		if (FAILED(hr)) {
+			safeRelease(t1, t1);
+			throw std::runtime_error(msg);
+		}
+	}
+
+	template <typename T1, typename T2, typename T3>
+	inline void ifError(HRESULT hr, const std::string& msg,
+					 T1 t1, T2 t2, T3 t3) {
+		if (FAILED(hr)) {
+			safeRelease(t1, t1, t3);
+			throw std::runtime_error(msg);
+		}
 	}
 
 	void initDeviceEnumerator() {
@@ -69,14 +97,12 @@ namespace soundsolved::SVHelper {
 	}
 
 	unsigned int getNumberDevices() {
-		unsigned int nDevices;
+		unsigned int nDevices = 0;
 
-		nDevices = 0;
 		if (pCollection == nullptr) {
 			try {
 				initDeviceCollection();
 			} catch (std::runtime_error& e) {
-
 				throw e;
 			}
 		}
@@ -86,14 +112,33 @@ namespace soundsolved::SVHelper {
 	}
 
 	std::unique_ptr<SVAudioDevices::SVAudioDevices> makeAudioDevice(
-			IMMDevice *pDevice, IPropertyStore *pProps, const std::wstring& name = L"") {
+			IMMDevice *pDevice, IPropertyStore *pProps) {
 		LPWSTR id;
 		PROPVARIANT varName;
+		PROPVARIANT desc;
+		std::unique_ptr<SVAudioDevices::SVAudioDevices> device;
 
+		PropVariantInit(&varName);
+		PropVariantInit(&desc);
 		hr = pDevice->GetId(&id);
-
-		safeRelease(pDevice, pProps);
-		if (FAILED(hr)) { throw std::runtime_error("Cannot get device informations"); }
+		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
+			throw e;
+		}
+		hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
+			throw e;
+		}
+		hr = pProps->GetValue(PKEY_Device_DeviceDesc, &desc);
+		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
+			throw e;
+		}
+		if (desc.pwszVal == std::wstring(L"Microphone")) {
+			return std::make_unique<SVAudioDevices::SVMicrophone>
+			(varName.pwszVal, desc.pwszVal);
+		} else if (desc.pwszVal == std::wstring(L"Haut-parleurs")) {
+			return std::make_unique<SVAudioDevices::SVSpeaker>
+			(varName.pwszVal, desc.pwszVal);
+		}
 		return nullptr;
 	}
 }

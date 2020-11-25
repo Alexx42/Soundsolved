@@ -5,8 +5,8 @@
 #ifndef SOUNDSOLVED_SVAUDIODEVICES_H
 #define SOUNDSOLVED_SVAUDIODEVICES_H
 
+#include <iostream>
 #include <string>
-
 #include <memory>
 #include <utility>
 

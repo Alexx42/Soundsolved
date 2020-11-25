@@ -10,7 +10,11 @@
 namespace soundsolved::SVAudioDevices {
 	using namespace soundsolved::SVAudioDevices;
 	class SVSpeaker : public SVAudioDevices {
-
+	public:
+		SVSpeaker(std::wstring nom, std::wstring id) :
+			SVAudioDevices(std::move(nom), std::move(id)) {;};
+		~SVSpeaker() {;}
+	private:
 	};
 }
 

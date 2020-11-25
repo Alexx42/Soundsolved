@@ -12,6 +12,11 @@
 namespace soundsolved::SVAudioDevices {
 	using namespace soundsolved::SVAudioDevices;
 	class SVHeadphone : public SVAudioDevices {
+		SVHeadphone(std::wstring nom, std::wstring id) :
+			SVAudioDevices(std::move(nom), std::move(id)) {;};
+
+		~SVHeadphone() {;};
+
 
 	};
 }

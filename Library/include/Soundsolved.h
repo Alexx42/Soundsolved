@@ -7,6 +7,10 @@
 
 #include <memory>
 #include <vector>
+#include <stdexcept>
+
+#include <SVHelper.h>
+
 
 #include <windows.h>
 #include <mmdeviceapi.h>
@@ -15,12 +19,26 @@
 
 namespace soundsolved {
 	extern HRESULT hr;
-	extern unsigned int nDevices;
+	extern IMMDevice *pDevice;
+	extern IPropertyStore *pProps;
 	extern IMMDeviceEnumerator *pEnumerator;
 	extern IMMDeviceCollection *pCollection;
+	extern unsigned int nDevices;
 	/*
 	 * Functions to get specific Audio Devices
 	 */
+
+	namespace soundsolved_error {
+		class NumberOfDevicesIsNull : public std::exception {
+		public:
+			NumberOfDevicesIsNull() {;}
+			virtual ~NumberOfDevicesIsNull() noexcept {;}
+
+			const char* what() throw() override {
+				return "The number of devices is null";
+			}
+		};
+	}
 }
 
 #endif //SOUNDSOLVED_SOUNDSOLVED_H

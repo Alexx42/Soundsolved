@@ -9,4 +9,6 @@ namespace soundsolved {
 	unsigned int nDevices = 0;
 	IMMDeviceEnumerator *pEnumerator = nullptr;
 	IMMDeviceCollection *pCollection = nullptr;
+	IMMDevice* pDevice = nullptr;
+	IPropertyStore *pProps = nullptr;
 }

@@ -93,7 +93,13 @@ namespace soundsolved::SVAudioDevices {
 	class SVAudioDevices : SVDevicesEvent {
 	public:
 		SVAudioDevices(std::wstring nom, std::wstring id) :
-			nom_(std::move(nom)), id_(std::move(id)) {;}
+			nom_(std::move(nom)), id_(std::move(id)) {;};
+
+		~SVAudioDevices() {;};
+
+		std::wstring getNom() { return nom_; }
+		std::wstring getId() { return id_; }
+
 	protected:
 		std::wstring nom_;
 		std::wstring id_;
@@ -103,6 +109,8 @@ namespace soundsolved::SVAudioDevices {
 	 * Functions to get a specific audio device
 	 */
 	std::unique_ptr<SVAudioDevices> getAudioDevice(const std::wstring&);
+
+	std::vector<std::wstring> getAllAudioDevicesByName();
 }
 
 #endif //SOUNDSOLVED_SVAUDIODEVICES_H

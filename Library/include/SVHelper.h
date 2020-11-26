@@ -19,7 +19,11 @@
  */
 namespace soundsolved::SVHelper {
 
-#define ERR_INF_DEVICE "Runtime error: Cannot get information about the device."
+#define ERROR_INFO_DEVICE "Runtime error: Cannot get information about the device."
+#define ERROR_CREATE_INSTANCE "runtime error: Cannot create instance."
+#define ERROR_GET_COLLECTION "runtime error: Cannot get collecion."
+#define ERROR_GET_NB_DEVICES "runtime error: Cannot get the number of audio devices."
+#define ERROR_GET_PROPERTYSTORE "runtime error: Cannot get property store."
 
 	template <typename T>
 	inline void safeRelease(T t) {
@@ -61,6 +65,21 @@ namespace soundsolved::SVHelper {
 		}
 	}
 
+	template <typename T1>
+	inline void initPointerToNull(T1 t1) {
+		t1 = nullptr;
+	}
+
+	template <typename T1, typename T2>
+	inline void initPointerToNull(T1 t1, T2 t2) {
+		t1 = nullptr, t2 = nullptr;
+	}
+
+	template <typename T1, typename T2, typename T3>
+	inline void initPointerToNull(T1 t1, T2 t2, T3 t3) {
+		t1 = nullptr, t2 = nullptr, t3 = nullptr;
+	}
+
 	void initDeviceEnumerator() {
 		if (pEnumerator != nullptr) {
 			return ;
@@ -71,7 +90,9 @@ namespace soundsolved::SVHelper {
 				nullptr, CLSCTX_INPROC_SERVER,
 				__uuidof(IMMDeviceEnumerator),
 				(void **)&pEnumerator);
-		if (FAILED(hr)) { throw std::runtime_error("Cannot create instace"); }
+		try { ifError(hr, ERROR_CREATE_INSTANCE) } catch (std::runtime_error& e) {
+			return e;
+		}
 	}
 
 	void initDeviceCollection() {
@@ -90,10 +111,17 @@ namespace soundsolved::SVHelper {
 				eAll,
 				DEVICE_STATE_ACTIVE,
 				&pCollection);
-		if (FAILED(hr)) {
-			safeRelease(pEnumerator, pCollection);
-			throw std::runtime_error("Cannot get devices collection");
+		try { ifError(hr, ERROR_GET_COLLECTION, pEnumerator, pCollection) } catch (std::runtime_error& e) {
+			throw e;
 		}
+	}
+
+	IMMDevice *getIMMDevice(unsigned int index) {
+		IMMDevice *device = nullptr;
+
+		hr = pCollection->Item(index, &device);
+		ifError()
+		return device;
 	}
 
 	unsigned int getNumberDevices() {
@@ -107,39 +135,46 @@ namespace soundsolved::SVHelper {
 			}
 		}
 		hr = pCollection->GetCount(&nDevices);
-		if (FAILED(hr)) { throw std::runtime_error("Cannot get the number of audio devices"); }
+		try { ifError(hr, ERROR_GET_NB_DEVICES, pEnumerator, pCollection); } catch (std::runtime_error& e) {
+			throw e;
+		}
 		return nDevices;
+	}
+
+	std::wstring getDeviceValue(IPropertyStore *pProps, PROPERTYEY pKey) {
+		PROPVARIANT name;
+
+		PropVariantInit(&fname);
+		hr = pProps->GetValue(pKey, &name);
+		try { ifError(hr, ERROR_INFO_DEVICE, pProps)} catch (std::runtime_error& e) {
+			throw e;
+		}
+		return std::wstring(name.pwszVal);
 	}
 
 	std::unique_ptr<SVAudioDevices::SVAudioDevices> makeAudioDevice(
 			IMMDevice *pDevice, IPropertyStore *pProps) {
 		LPWSTR id;
-		PROPVARIANT varName;
-		PROPVARIANT desc;
-		std::unique_ptr<SVAudioDevices::SVAudioDevices> device;
+		std::wstring name, desc;
+		std::unique_ptr<SVAudioDevices::SVAudioDevices> device = nullptr;
 
-		PropVariantInit(&varName);
-		PropVariantInit(&desc);
 		hr = pDevice->GetId(&id);
-		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
-			throw e;
-		}
-		hr = pProps->GetValue(PKEY_Device_FriendlyName, &varName);
-		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
-			throw e;
-		}
-		hr = pProps->GetValue(PKEY_Device_DeviceDesc, &desc);
-		try { ifError(hr, ERR_INF_DEVICE, pDevice, pProps); } catch(std::runtime_error& e) {
+		try {
+			ifError(hr, ERROR_INFO_DEVICE, pDevice, pProps);
+			name = getDeviceValue(pProps, PKEY_Device_FriendlyName);
+			desc = getDeviceValue(pProps, PKEY_Device_DescName);
+		} catch (std::runtime_error& e) {
 			throw e;
 		}
 		if (desc.pwszVal == std::wstring(L"Microphone")) {
-			return std::make_unique<SVAudioDevices::SVMicrophone>
-			(varName.pwszVal, desc.pwszVal);
+			device = std::make_unique<SVAudioDevices::SVMicrophone>
+			(varName.pwszVal, id);
 		} else if (desc.pwszVal == std::wstring(L"Haut-parleurs")) {
-			return std::make_unique<SVAudioDevices::SVSpeaker>
-			(varName.pwszVal, desc.pwszVal);
+			device = std::make_unique<SVAudioDevices::SVSpeaker>
+			(varName.pwszVal, id);
 		}
-		return nullptr;
+		CoTaskMemFree(id);
+		return device;
 	}
 }
 

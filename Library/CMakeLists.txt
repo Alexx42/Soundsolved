@@ -8,18 +8,20 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}lib/)
 set(devices_includes
         SVHeadphone.h
         SVMicrophone.h
-        SVSpeaker.h)
+        SVSpeaker.h
+        SVUnknown.h)
 
-set(devices_sources
-        SVHeadphone.cpp
-        SVMicrophone.cpp
-        SVSpeaker.cpp)
+set(devices_sources)
+#        SVHeadphone.cpp
+#        SVMicrophone.cpp
+#        SVSpeaker.cpp)
 
 list(TRANSFORM devices_sources PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/src/devices/)
 list(TRANSFORM devices_includes PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/include/devices/)
 
 set(target_sources
         Soundsolved.cpp
+        SVHelper.cpp
         SVAudioDevices.cpp)
 
 set(target_includes

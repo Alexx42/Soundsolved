@@ -1,7 +1,6 @@
 //
 // Created by alexandrelegoff on 22/11/2020.
 //
-
 #ifndef SOUNDSOLVED_SVAUDIODEVICES_H
 #define SOUNDSOLVED_SVAUDIODEVICES_H
 
@@ -16,16 +15,13 @@
 #include <endpointvolume.h>
 
 #include <Soundsolved.h>
+#include <SVHelper.h>
 
 #include <initguid.h>
+#include <devpkey.h>
 #include <functiondiscoverykeys_devpkey.h>
 
-namespace soundsolved {
-	extern IMMDeviceCollection* pCollection;
-	extern IMMDeviceEnumerator* pEnumerator;
-}
-
-namespace soundsolved::SVAudioDevices {
+namespace soundsolved::audiodevices {
 	struct SVDevicesEvent : IMMNotificationClient {
 		HRESULT cRef = 1;
 
@@ -95,20 +91,27 @@ namespace soundsolved::SVAudioDevices {
 		SVAudioDevices(std::wstring nom, std::wstring id) :
 			nom_(std::move(nom)), id_(std::move(id)) {;};
 
-		~SVAudioDevices() {;};
+		~SVAudioDevices() = default;
 
-		std::wstring getNom() { return nom_; }
-		std::wstring getId() { return id_; }
+		std::wstring getNom() const { return nom_; }
+		std::wstring getId() const { return id_; }
 
 	protected:
 		std::wstring nom_;
 		std::wstring id_;
 	};
 
+#include <SVMicrophone.h>
+#include <SVSpeaker.h>
+#include <SVUnknown.h>
+#include <SVHeadphone.h>
+
+	SVAudioDevices makeAudioDevice(helper::IMMInterface&);
+
 	/*
 	 * Functions to get a specific audio device
 	 */
-	std::unique_ptr<SVAudioDevices> getAudioDevice(const std::wstring&);
+	SVAudioDevices getAudioDevice(const std::wstring&);
 
 	std::vector<std::wstring> getAllAudioDevicesByName();
 }

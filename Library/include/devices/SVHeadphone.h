@@ -5,17 +5,14 @@
 #ifndef SOUNDSOLVED_SVHEADPHONE_H
 #define SOUNDSOLVED_SVHEADPHONE_H
 
-#include <Soundsolved.h>
+#include <SVAudioDevices.h>
 
-
-
-namespace soundsolved::SVAudioDevices {
-	using namespace soundsolved::SVAudioDevices;
+namespace soundsolved::audiodevices {
 	class SVHeadphone : public SVAudioDevices {
 		SVHeadphone(std::wstring nom, std::wstring id) :
-			SVAudioDevices(std::move(nom), std::move(id)) {;};
+			SVAudioDevices(std::move(nom), std::move(id)) {};
 
-		~SVHeadphone() {;};
+		virtual ~SVHeadphone() = default;
 
 
 	};

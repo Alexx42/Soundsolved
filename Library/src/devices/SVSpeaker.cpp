@@ -4,6 +4,6 @@
 
 #include <SVSpeaker.h>
 
-using namespace soundsolved::SVAudioDevices;
+using namespace soundsolved::audiodevices;
 
 

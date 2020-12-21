@@ -1,17 +1,23 @@
-#include <Soundsolved.h>
 #include <SVAudioDevices.h>
 
-#include <memory>
-#include <iostream>
-
-using namespace soundsolved::SVAudioDevices;
+using namespace soundsolved::audiodevices;
 
 int		main() {
-	std::vector<std::wstring> name_audio_device;
+	std::vector<std::unique_ptr<SVAudioDevices> > advs;
 
-	name_audio_device = getAllAudioDevicesByName();
-	for (const auto& x: name_audio_device) {
-		std::wcout << x << std::endl;
+	advs = getAllAudioDevices();
+	for (const auto& x: advs) {
+		ESVRole role = getAudioDeviceType(x);
+		std::wcout << x->getNom() << std::endl;
+		if (role == ESVRole::UNKNOWN) {
+			std::cout << "Unknown" << std::endl;
+		}
+		else if (role == ESVRole::PLAY) {
+			std::cout << "Play" << std::endl;
+		}
+		else if (role == ESVRole::RECORD) {
+			std::cout << "Record" << std::endl;
+		}
 	}
 	return 0;
 }

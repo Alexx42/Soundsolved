@@ -4,7 +4,9 @@
 
 #include <SVHelper.h>
 
-namespace soundsolved::audiodevices::helper {
+using namespace soundsolved::svhelper;
+
+namespace soundsolved::audiodevices::svhelper {
 	IMMInterface::IMMInterface() :
 	hr_(S_OK),
 	pEnumerator_(nullptr),
@@ -13,7 +15,7 @@ namespace soundsolved::audiodevices::helper {
 	pProps_(nullptr) {}
 
 	IMMInterface::~IMMInterface() {
-		SVHelper::safeRelease(pEnumerator_, pDevice_, pCollection_, pProps_);
+		safeRelease(pEnumerator_, pDevice_, pCollection_, pProps_);
 	}
 
 	void IMMInterface::setDeviceEnumerator() {
@@ -26,7 +28,7 @@ namespace soundsolved::audiodevices::helper {
 				nullptr, CLSCTX_INPROC_SERVER,
 				__uuidof(IMMDeviceEnumerator),
 				(void **)&pEnumerator_);
-		try { SVHelper::ifError(hr_, ERROR_CREATE_INSTANCE, pEnumerator_); }
+		try { ifError(hr_, ERROR_CREATE_INSTANCE, pEnumerator_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}
@@ -46,7 +48,7 @@ namespace soundsolved::audiodevices::helper {
 				eAll,
 				DEVICE_STATE_ACTIVE,
 				&pCollection_);
-		try { SVHelper::ifError(hr_, ERROR_GET_COLLECTION, pEnumerator_, pCollection_); }
+		try { ifError(hr_, ERROR_GET_COLLECTION, pEnumerator_, pCollection_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}
@@ -60,7 +62,7 @@ namespace soundsolved::audiodevices::helper {
 			}
 		}
 		hr_ = pCollection_->Item(index, &pDevice_);
-		try { SVHelper::ifError(hr_, ERROR_GET_DEVICE, pEnumerator_, pCollection_); }
+		try { ifError(hr_, ERROR_GET_DEVICE, pEnumerator_, pCollection_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}
@@ -71,7 +73,7 @@ namespace soundsolved::audiodevices::helper {
 			return ;
 		}
 		hr_ = pDevice_->OpenPropertyStore(STGM_READ, &pProps_);
-		try { SVHelper::ifError(hr_, ERROR_GET_PROPERTYSTORE, pEnumerator_, pCollection_, pDevice_); }
+		try { ifError(hr_, ERROR_GET_PROPERTYSTORE, pEnumerator_, pCollection_, pDevice_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}
@@ -88,9 +90,12 @@ namespace soundsolved::audiodevices::helper {
 			}
 		}
 		hr_ = pCollection_->GetCount(&nDevices);
-		try { SVHelper::ifError(hr_, ERROR_GET_NB_DEVICES, pEnumerator_, pCollection_); }
+		try { ifError(hr_, ERROR_GET_NB_DEVICES, pEnumerator_, pCollection_); }
 		catch (std::runtime_error& e) {
 			throw e;
+		}
+		if (!nDevices) {
+			throw NumberOfDeviceIsNull();
 		}
 		return nDevices;
 	}
@@ -100,7 +105,7 @@ namespace soundsolved::audiodevices::helper {
 
 		PropVariantInit(&name);
 		hr_ = pProps_->GetValue(pKey, &name);
-		try { SVHelper::ifError(hr_, ERROR_INFO_DEVICE, pProps_); }
+		try { ifError(hr_, ERROR_INFO_DEVICE, pProps_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}
@@ -111,7 +116,7 @@ namespace soundsolved::audiodevices::helper {
 		LPWSTR id;
 
 		hr_ = pDevice_->GetId(&id);
-		try { SVHelper::ifError(hr_, ERROR_GET_DEVICE_ID, pEnumerator_, pDevice_, pCollection_); }
+		try { ifError(hr_, ERROR_GET_DEVICE_ID, pEnumerator_, pDevice_, pCollection_); }
 		catch (std::runtime_error& e) {
 			throw e;
 		}

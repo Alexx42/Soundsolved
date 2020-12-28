@@ -13,21 +13,4 @@
 #include <mmdeviceapi.h>
 
 
-namespace soundsolved {
-	/*
-	 * Functions to get specific Audio Devices
-	 */
-	namespace soundsolved_error {
-		class NumberOfDevicesIsNull : public std::exception {
-		public:
-			NumberOfDevicesIsNull() {;}
-			~NumberOfDevicesIsNull() noexcept override {;}
-
-			[[nodiscard]] const char* what() const noexcept override {
-				return "The number of devices is null";
-			}
-		};
-	}
-}
-
 #endif //SOUNDSOLVED_SOUNDSOLVED_H

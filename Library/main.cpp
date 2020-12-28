@@ -3,21 +3,16 @@
 using namespace soundsolved::audiodevices;
 
 int		main() {
-	std::vector<std::unique_ptr<SVAudioDevices> > advs;
+	std::vector<std::wstring> advs;
 
-	advs = getAllAudioDevices();
-	for (const auto& x: advs) {
-		ESVRole role = getAudioDeviceType(x);
-		std::wcout << x->getNom() << std::endl;
-		if (role == ESVRole::UNKNOWN) {
-			std::cout << "Unknown" << std::endl;
+	try {
+		advs = getAllAudioDevicesByName();
+		for (auto& x: advs) {
+			std::wcout << x << std::endl;
 		}
-		else if (role == ESVRole::PLAY) {
-			std::cout << "Play" << std::endl;
-		}
-		else if (role == ESVRole::RECORD) {
-			std::cout << "Record" << std::endl;
-		}
+	} catch (std::runtime_error &e) {
+		std::cout << e.what() << std::endl;
 	}
+
 	return 0;
 }

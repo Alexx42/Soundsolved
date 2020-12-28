@@ -13,6 +13,7 @@
 
 #include <mmdeviceapi.h>
 
+
 #include <initguid.h>
 #include <functiondiscoverykeys_devpkey.h>
 
@@ -21,8 +22,8 @@
  * contains functions helping for the library development.
  */
 
-namespace soundsolved::SVHelper
-{
+namespace soundsolved::svhelper::sverror {
+
 #define ERROR_INFO_DEVICE "runtime error: Cannot get information about the device."
 #define ERROR_CREATE_INSTANCE "runtime error: Cannot create instance."
 #define ERROR_GET_COLLECTION "runtime error: Cannot get collecion."
@@ -30,6 +31,18 @@ namespace soundsolved::SVHelper
 #define ERROR_GET_PROPERTYSTORE "runtime error: Cannot get property store."
 #define ERROR_GET_DEVICE "runtime error: Cannot get device."
 #define ERROR_GET_DEVICE_ID "runtime error: Cannot get device ID"
+
+	class NumberOfDevicesIsNull : public std::runtime_error {
+	public:
+		NumberOfDevicesIsNull() : std::runtime_error("The number of device is 0.") {;}
+		~NumberOfDevicesIsNull() noexcept override {;}
+	};
+};
+
+namespace soundsolved::svhelper
+{
+	template <typename T>
+	using u_ptr = std::unique_ptr<T>;
 
 	template<typename T>
 	inline void safeRelease(T t)
@@ -113,14 +126,25 @@ namespace soundsolved::SVHelper
 		t1 = nullptr, t2 = nullptr;
 	}
 
-	template<typename T1, typename T2, typename T3>
+	template <typename T1, typename T2, typename T3>
 	[[maybe_unused]] inline void initPointerToNull(T1 t1, T2 t2, T3 t3)
 	{
 		t1 = nullptr, t2 = nullptr, t3 = nullptr;
 	}
+
+	template <class T, class... Args>
+	void debug(T arg, Args... args)
+	{
+		WATCH(arg);
+		if constexpr (sizeof...(Args) > 0) {
+			debug(args...);
+		}
+	}
+
+
 }
 
-namespace soundsolved::audiodevices::helper {
+namespace soundsolved::audiodevices::svhelper {
 	class IMMInterface {
 	public:
 		IMMInterface();

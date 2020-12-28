@@ -95,7 +95,7 @@ namespace soundsolved::audiodevices::svhelper {
 			throw e;
 		}
 		if (!nDevices) {
-			throw NumberOfDeviceIsNull();
+			throw sverror::NumberOfDevicesIsNull();
 		}
 		return nDevices;
 	}

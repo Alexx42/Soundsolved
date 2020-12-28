@@ -1,12 +1,12 @@
 //
 // Created by alexandrelegoff on 22/11/2020.
 //
+
 #ifndef SOUNDSOLVED_SVAUDIODEVICES_H
 #define SOUNDSOLVED_SVAUDIODEVICES_H
 
 #include <iostream>
 #include <string>
-#include <memory>
 #include <utility>
 
 #include <windows.h>
@@ -21,7 +21,17 @@
 #include <devpkey.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+using namespace soundsolved::svhelper;
+using namespace soundsolved::audiodevices::svhelper;
+
 namespace soundsolved::audiodevices {
+
+	enum ESVRole {
+		UNKNOWN,
+		RECORD,
+		PLAY,
+	};
+
 	struct SVDevicesEvent : IMMNotificationClient {
 		HRESULT cRef = 1;
 
@@ -89,12 +99,12 @@ namespace soundsolved::audiodevices {
 	class SVAudioDevices : SVDevicesEvent {
 	public:
 		SVAudioDevices(std::wstring nom, std::wstring id) :
-			nom_(std::move(nom)), id_(std::move(id)) {;};
+			nom_(std::move(nom)), id_(std::move(id)) {};
 
-		~SVAudioDevices() = default;
+		virtual ~SVAudioDevices() = default;
 
-		std::wstring getNom() const { return nom_; }
-		std::wstring getId() const { return id_; }
+		[[nodiscard]] std::wstring getNom() const { return nom_; }
+		[[nodiscard]] std::wstring getId() const { return id_; }
 
 	protected:
 		std::wstring nom_;
@@ -103,17 +113,24 @@ namespace soundsolved::audiodevices {
 
 #include <SVMicrophone.h>
 #include <SVSpeaker.h>
-#include <SVUnknown.h>
 #include <SVHeadphone.h>
+#include <SVUnknown.h>
 
-	SVAudioDevices makeAudioDevice(helper::IMMInterface&);
+	template <typename T>
+	using u_ptr = std::unique_ptr<T>;
 
+	u_ptr<SVAudioDevices> makeAudioDevice(IMMInterface&);
 	/*
 	 * Functions to get a specific audio device
 	 */
-	SVAudioDevices getAudioDevice(const std::wstring&);
+	u_ptr<SVAudioDevices> getAudioDevice(const std::wstring&);
 
 	std::vector<std::wstring> getAllAudioDevicesByName();
+	std::vector<u_ptr<SVAudioDevices>> getAllAudioDevices();
+
+	ESVRole getAudioDeviceType(const u_ptr<SVAudioDevices>&);
+
+
 }
 
 #endif //SOUNDSOLVED_SVAUDIODEVICES_H
